@@ -70,7 +70,11 @@ However, this k-NN model has been optimized for my set of test data and will nee
 Currently, no files are outputted. However, there are several print statements in the main method that output the best k-NN parameters as well as the final binary fraction with errors, as is shown below.
 
 `Best leaf_size: 1`
+
 `Best p: 1`
+
 `Best n_neighbors: 26`
+
 `Best score: 0.93`
+
 `The binary fraction for this sample is: 10.63 plus 18.67 minus 3.61`

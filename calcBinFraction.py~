@@ -1,0 +1,13 @@
+import numpy as np
+import pandas as pd
+
+def main():
+    # csv of known binary or single stars as well as their photometry / flags
+    knownStars = pd.read_csv("KnownStars.csv")
+
+    # csv of unknown stars as well as their photometry / flags
+    unknownStars = pd.read_csv("UnknownStars.csv")
+
+
+if __name__ == "__main__":
+    main()

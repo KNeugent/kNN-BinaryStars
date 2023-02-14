@@ -17,7 +17,23 @@ To train the k-NN classifier, I heavily relied on the following [blog post](http
 
 ### Training and Applying the k-NN classifier
 
+The k-NN model was trained on the 295 red supergiants (single and binary) that had been observed spectroscopically and were thus known to be either single or binary. The features used were the following:
+* Magnitudes: Umag, Bmag, Vmag, Imag
+* Colors: U-B, B-V
+* Flag: UV (0 if no detection in UV, 1 if detection in UV)
 
+The first step was to scale the feature values using `sklearn RobustScaler`. This is because the magnitude values ranged from 15 - 20, the colors ranged from -5 to 5, and the UV flag was either 0 or 1. Instead of having the magnitudes get more weight because their values are larger, I wanted each of the features to get the same weight when classifying. Scaling the features achieves this.
+
+The next step was to define the classifier using the spectroscopically confirmed / known single and binary red supergiants. Using the method described in the [blog post](https://towardsdatascience.com/building-a-k-nearest-neighbors-k-nn-model-with-scikit-learn-51209555453a), I determined that the optimal number of folds for cross-validation was 15 (`cv = 15`). I then iterated over the `leaf_size`, `n_neighbors`, and `p` value to find the best set of hyperparameters for classification by maximizing the model's overall score.
+
+For reference, I found the following results were ideal for my set of data:
+* cv = 15
+* leaf_size = 1
+* p = 1
+* n_neighbors = 26
+* best score = 0.9339
+
+Finally, I applied this k-NN model to the 3698 unclassified red supergiants and produced the results below.
 
 ### Results
 
@@ -35,6 +51,12 @@ The imported packages are pandas, numpy, and sklearn.
 This code has been tested using python 3.7.3, numpy 1.18.2, pandas 1.0.3, and sklearn 0.21.
 
 ### Running the code
+
+At the most basic level, the following must be changed in the main method to apply a k-NN classification algorithm to a new set of objects:
+* update the `knownStars` and `unknownStars` arrays. The `knownStars` must have a column called "Classification" that contains a flag indicating binarity (0 = single star, 1 = binary).
+* update the `features` array to select the relevant features to train the model against.
+
+However, this k-NN model has been optimized for my set of data and will need to be optimized for yours as well. Please follow the blog post mentioned above and examine the comments in the code to build your own k-NN model.
 
 ### Outputted files
 

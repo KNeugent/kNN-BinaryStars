@@ -42,8 +42,8 @@ def defineClassifier(known, unknownStars):
             bestLeaf (int): best leaf_size value
             bestP (int): best p-value
             bestNNeigh (int): best n_neighbor value
-            bestScore (int): best score for k-NN classifier
-            predProb ([int,int,...]): array of output values from k-NN
+            bestScore (float): best score for k-NN classifier
+            predProb ([float]): array of output values from k-NN
     """
 
     # don't include Classification in training set since it isn't a feature
@@ -89,14 +89,14 @@ def calcBinFraction(predProb, known, bestScore):
     the k-NN classifier
 
         Parameters:
-            predProb ([int,int,...]): array of output values from k-NN
+            predProb ([float]): array of output values from k-NN
             known (pandas DataFrame): pandas DataFrame of known stars
-            bestScore (int): best score (for calculating the error)
+            bestScore (float): best score (for calculating the error)
 
         Returns:
-            per (int): binary fraction as a percent
-            err_per_M (int): negative error on binary fraction
-            err_per_P (int): positive error on binary fraction
+            per (float): binary fraction as a percent
+            err_per_M (float): negative error on binary fraction
+            err_per_P (float): positive error on binary fraction
     """
     # select the binaries from known and unknown
     binG = np.sum(predProb[:, 1])

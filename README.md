@@ -1,6 +1,6 @@
 # kNN-BinaryStars
 
-This program differentiates between single and binary star systems using photometric constraints [python's sklearn k-NN classifier](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html). It was originally developed as part of my graduate thesis work at the University of Washington to differentiate between red supergiants with and without OB star companions, but it can be extended to any set of binary systems where the photometric colors of the two stars are sufficiently different (as in, one is hot / blue and one is cold / red).
+This program differentiates between single and binary star systems using photometric constraints and [python's sklearn k-NN classifier](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html). It was originally developed as part of my graduate thesis work at the University of Washington to differentiate between red supergiants with and without OB star companions, but it can be extended to any set of binary systems where the photometric colors of the two stars are sufficiently different (as in, one is hot / blue and one is cold / red).
 
 ## Methodology
 
@@ -12,7 +12,7 @@ As part of my thesis work, I trained a k-Nearest Neighbor (k-NN) classifier to s
 
 ![knn1](https://github.com/KNeugent/kNN-BinaryStars/blob/main/images/knn1.jpg)
 
-In the case of the red supergiant and OB star binaries, the axes were photometric color information spanning from the UV to the NIR (in 7-dimentional space) and the two classes were single red supergiants and binary red supergiants.
+In the case of the red supergiant and OB star binaries, the axes were photometric color information spanning from the UV to the NIR (in 7-dimensional space) and the two classes were single red supergiants and binary red supergiants.
 
 ![knn2](https://github.com/KNeugent/kNN-BinaryStars/blob/main/images/knn2.jpg)
 
@@ -23,7 +23,7 @@ To train the k-NN classifier, I heavily relied on the following [blog post](http
 The k-NN model was trained on the 295 red supergiants (single and binary) that had been observed spectroscopically and were thus known to be either single or binary. The features used were the following:
 * Magnitudes: Umag, Bmag, Vmag, Imag
 * Colors: U-B, B-V
-* Flag: UV (0 if no detection in UV, 1 if detection in UV from Swift archival data)
+* Flag: UV (0 if no detection in UV, 1 if detection in UV from [Swift archival data](https://heasarc.gsfc.nasa.gov/docs/archive.html))
 
 The first step was to scale the feature values using `sklearn RobustScaler`. This is because the magnitude values ranged from 15 - 20, the colors ranged from -5 to 5, and the UV flag was either 0 or 1. Instead of having the magnitudes get more weight because their values were larger, I wanted each of the features to get the same weight when classifying. Scaling the features achieves this.
 
@@ -60,7 +60,7 @@ This code has been tested using `python 3.7.3`, `numpy 1.18.2`, `pandas 1.0.3`, 
 ### Running the code
 
 At the most basic level, the following must be changed in the main method to apply a k-NN classification algorithm to a new set of objects:
-* update the `knownStars` and `unknownStars` arrays. The `knownStars` must have a column called "Classification" that contains a flag indicating binarity (0 = single star, 1 = binary). Example files for testing purposes are in the github repository.
+* update the `knownStars` and `unknownStars` arrays. The `knownStars` must have a column called "Classification" that contains a flag indicating binarity (0 = single star, 1 = binary). Example files for testing purposes are in the github repository. (e.g. [knownStars.csv](https://github.com/KNeugent/kNN-BinaryStars/blob/main/KnownStars.csv) and [UnknownStars.csv](https://github.com/KNeugent/kNN-BinaryStars/blob/main/UnknownStars.csv))
 * update the `features` array to select the relevant features to train the model against.
 
 However, this k-NN model has been optimized for my set of test data and will need to be optimized for yours as well. Please follow the blog post mentioned above and examine the comments in the code to build your own k-NN model and classify new stars.

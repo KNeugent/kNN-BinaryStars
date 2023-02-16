@@ -36,7 +36,7 @@ def defineClassifier(known, unknownStars):
 
         Parameters:
             known (pandas dataFrame): Pandas DF with scaled features
-            unknown (pandas dataFrame): Pandas DF with scaled features
+            unknownStars (pandas dataFrame): Pandas DF with scaled features
 
         Returns:
             bestLeaf (int): best leaf_size value

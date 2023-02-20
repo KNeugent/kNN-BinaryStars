@@ -73,7 +73,7 @@ This code has been tested using `python 3.7.3`, `numpy 1.18.2`, `pandas 1.0.3`, 
 ### Running the code
 
 At the most basic level, the following must be changed in the main method to apply a k-NN classification algorithm to a new set of objects:
-* update the `knownStars` and `unknownStars` arrays. The `knownStars` must have a column called "Classification" that contains a flag indicating binarity (0 = single star, 1 = binary). Example files for testing purposes are in the github repository. (e.g. [knownStars.csv](https://github.com/KNeugent/kNN-BinaryStars/blob/main/KnownStars.csv) and [UnknownStars.csv](https://github.com/KNeugent/kNN-BinaryStars/blob/main/UnknownStars.csv))
+* update the `known_stars` and `unknown_stars` arrays. The `known_stars` must have a column called "Classification" that contains a flag indicating binarity (0 = single star, 1 = binary). Example files for testing purposes are in the github repository. (e.g. [known_stars.csv](https://github.com/KNeugent/kNN-BinaryStars/blob/main/known_stars.csv) and [unknown_stars.csv](https://github.com/KNeugent/kNN-BinaryStars/blob/main/unknown_stars.csv))
 * update the `features` array to select the relevant features to train the model against.
 
 However, this k-NN model has been optimized for my set of test data and will need to be optimized for yours as well. Please follow the blog post mentioned above and examine the comments in the code to build your own k-NN model and classify new stars.

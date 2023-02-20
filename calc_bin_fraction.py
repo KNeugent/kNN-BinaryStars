@@ -5,7 +5,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import KNeighborsClassifier
 
 
-def scaleData(known, unknown, features):
+def scale_data(known, unknown, features):
     """
     Scales the features numerically so ones with higher numerical values
     don't dominate the classification.
@@ -29,21 +29,21 @@ def scaleData(known, unknown, features):
     return known, unknown
 
 
-def defineClassifier(known, unknownStars):
+def define_classifier(known, unknown):
     """
     Iterates over a range of hyperparameters and defines a k-NN classifier.
     Then uses this classifier to classify the unknown stars.
 
         Parameters:
             known (pandas dataFrame): Pandas DF with scaled features
-            unknownStars (pandas dataFrame): Pandas DF with scaled features
+            unknown (pandas dataFrame): Pandas DF with scaled features
 
         Returns:
-            bestLeaf (int): best leaf_size value
-            bestP (int): best p-value
-            bestNNeigh (int): best n_neighbor value
-            bestScore (float): best score for k-NN classifier
-            predProb ([float]): array of output values from k-NN
+            best_leaf (int): best leaf_size value
+            best_p (int): best p-value
+            best_NNeigh (int): best n_neighbor value
+            best_score (float): best score for k-NN classifier
+            pred_prob ([float]): array of output values from k-NN
     """
 
     # don't include Classification in training set since it isn't a feature
@@ -72,26 +72,26 @@ def defineClassifier(known, unknownStars):
     knn_gscv.fit(X, y)
 
     # save the results of the best set of parameters
-    bestLeaf = knn_gscv.best_estimator_.get_params()["leaf_size"]
-    bestP = knn_gscv.best_estimator_.get_params()["p"]
-    bestNNeigh = knn_gscv.best_estimator_.get_params()["n_neighbors"]
-    bestScore = knn_gscv.best_score_
+    best_leaf = knn_gscv.best_estimator_.get_params()["leaf_size"]
+    best_p = knn_gscv.best_estimator_.get_params()["p"]
+    best_NNeigh = knn_gscv.best_estimator_.get_params()["n_neighbors"]
+    best_score = knn_gscv.best_score_
 
     # classify the remaining unknown stars
-    predProb = knn_gscv.predict_proba(unknownStars)
+    pred_prob = knn_gscv.predict_proba(unknown)
 
-    return bestLeaf, bestP, bestNNeigh, bestScore, predProb
+    return best_leaf, best_p, best_NNeigh, best_score, pred_prob
 
 
-def calcBinFraction(predProb, known, bestScore):
+def calc_bin_fraction(pred_prob, known, best_score):
     """
     Calculates the binary fraction with errors based on the result from
     the k-NN classifier
 
         Parameters:
-            predProb ([float]): array of output values from k-NN
+            pred_prob ([float]): array of output values from k-NN
             known (pandas DataFrame): pandas DataFrame of known stars
-            bestScore (float): best score (for calculating the error)
+            best_score (float): best score (for calculating the error)
 
         Returns:
             per (float): binary fraction as a percent
@@ -99,22 +99,22 @@ def calcBinFraction(predProb, known, bestScore):
             err_per_P (float): positive error on binary fraction
     """
     # select the binaries from known and unknown
-    binG = np.sum(predProb[:, 1])
-    binK = len(known[known["Classification"] == 1])
+    bin_g = np.sum(pred_prob[:, 1])
+    bin_k = len(known[known["Classification"] == 1])
 
     # select the single stars from known and unknown
-    singG = np.sum(predProb[:, 0])
-    singK = len(known[known["Classification"] == 0])
+    sing_g = np.sum(pred_prob[:, 0])
+    sing_k = len(known[known["Classification"] == 0])
 
     # calculate the error (only on the unknown stars)
-    errorV = len(predProb) - len(predProb) * bestScore
+    error_v = len(pred_prob) - len(pred_prob) * best_score
 
     # determine the high and low values for the error
     # note that the error only needs to be applied to the binaries
     # see discussion in README for rational behind this calculation
-    per = (binG + binK) / (singG + singK) * 100
-    err_per_M = (binG - errorV + binK) / (singG + errorV + singK) * 100
-    err_per_P = (binG + errorV + binK) / (singG - errorV + singK) * 100
+    per = (bin_g + bin_k) / (sing_g + sing_k) * 100
+    err_per_M = (bin_g - error_v + bin_k) / (sing_g + error_v + sing_k) * 100
+    err_per_P = (bin_g + error_v + bin_k) / (sing_g - error_v + sing_k) * 100
 
     return per, err_per_M, err_per_P
 
@@ -122,28 +122,30 @@ def calcBinFraction(predProb, known, bestScore):
 def main():
     # csv of known binary or single stars as well as their photometry / flags
     # column named "classification" with 0 or 1 for binary or non-binary
-    knownStars = pd.read_csv("KnownStars.csv")
+    known_stars = pd.read_csv("known_stars.csv")
 
     # csv of unknown stars as well as their photometry / flags
-    unknownStars = pd.read_csv("UnknownStars.csv")
+    unknown_stars = pd.read_csv("unknown_stars.csv")
 
     # features
     features = [["Umag", "Bmag", "Vmag", "Imag", "U-B", "B-V", "UV"]]
 
     # scale the features so they are weighted equally
-    knownScaled, unknownScaled = scaleData(knownStars, unknownStars, features)
+    known_scaled, unknown_scaled = scale_data(known_stars, unknown_stars, features)
 
     # train the classifier using the known stars and classify unknown stars
-    bestLeaf, bestP, bestNNeigh, bestScore, predProb = defineClassifier(knownStars, unknownStars)
+    best_leaf, best_p, best_NNeigh, best_score, pred_prob = define_classifier(
+        known_stars, unknown_stars
+    )
 
     # print the best values
-    print("Best leaf_size:", bestLeaf)
-    print("Best p:", bestP)
-    print("Best n_neighbors:", bestNNeigh)
-    print("Best score:", round(bestScore, 2))
+    print("Best leaf_size:", best_leaf)
+    print("Best p:", best_p)
+    print("Best n_neighbors:", best_NNeigh)
+    print("Best score:", round(best_score, 2))
 
     # calculate the binary fraction
-    per, err_per_M, err_per_P = calcBinFraction(predProb, knownStars, bestScore)
+    per, err_per_M, err_per_P = calc_bin_fraction(pred_prob, known_stars, best_score)
 
     # print the resulting binary fraction with positive and negative errors
     print(

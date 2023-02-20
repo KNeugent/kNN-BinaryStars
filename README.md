@@ -1,6 +1,6 @@
 # kNN-BinaryStars
 
-This program differentiates between single and binary star systems using photometric constraints and [python's sklearn k-NN classifier](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html). It was originally developed as part of my graduate thesis work at the University of Washington to differentiate between red supergiants with and without OB star companions, but it can be extended to any set of binary systems where the photometric colors of the two stars are sufficiently different (as in, one is hot / blue and one is cold / red). For more information about the science background (as opposed to the programming methodology and usage), please see [Neugent et al. (2020)](https://ui.adsabs.harvard.edu/abs/2020ApJ...900..118N/abstract) and [Neugent (2021)](https://ui.adsabs.harvard.edu/abs/2021ApJ...908...87N/abstract). 
+This program differentiates between single and binary star systems using photometric constraints and [python's scikit-learn k-NN classifier](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html). It was originally developed as part of my graduate thesis work at the University of Washington to differentiate between red supergiants with and without OB star companions, but it can be extended to any set of binary systems where the photometric colors of the two stars are sufficiently different (as in, one is hot / blue and one is cold / red). For more information about the science background (as opposed to the programming methodology and usage), please see [Neugent et al. (2020)](https://ui.adsabs.harvard.edu/abs/2020ApJ...900..118N/abstract) and [Neugent (2021)](https://ui.adsabs.harvard.edu/abs/2021ApJ...908...87N/abstract). 
 
 ## Methodology
 
@@ -17,6 +17,19 @@ In the case of the red supergiant and OB star binaries, the axes were photometri
 ![knn2](https://github.com/KNeugent/kNN-BinaryStars/blob/main/images/knn2.jpg)
 
 To train the k-NN classifier, I heavily relied on the following [blog post](https://towardsdatascience.com/building-a-k-nearest-neighbors-k-nn-model-with-scikit-learn-51209555453a) and will go into a bit more detail below.
+
+### Why use k-NN?
+When I was first figuring out which algorithm to use to differentiate between the binary and single red supergiants, I looked into a variety of classification algorithms. I decided to use k-NN for the following reasons:
+* It is simple to implement and explain. Given this was my first foray into scikit-learn, I wanted to pick an algorithm I was going to be able to understand and explain during presentations and in my published paper.
+* It evolves with new data and is easy to train on new datasets. Because I wanted to apply this method to various sets of stars in different galaxies, I needed an algorithm that could be adjusted accordingly.
+* The algorithm also assumes that all features are of equal importance. While this could be a downside for some datasets, this was exactly what I needed for my classification purposes.
+* The time compexity behind k-NN isn't great ... it is O(MNlog(k)) where M is the number of dimensions, N is the number of training datasets, and k is the number of points to classify. However, because my datasets were small, the time complexity was sufficient for my needs.
+* One downside of k-NN is that it is sensitive to outliers. However, because I scaled the relative importance of distance (so that points that were closer had a higher weight), I was able to guard against outliers dominating the classification results.
+
+The other options I considered (and why I didn't use them) include:
+- Neural Networks: Given my small-ish set of training data, I was not confident that I could get a good accuracy level with neural networks. Additionally, neural networks have a large number of hyperparameters that need tuning and I was more comfortable only needing to tune `k` and the distance function for k-NN.
+- SVN (support vector network): Since I had sufficiently more training data than the number of features I was using, the accuracy for k-NN is higher than for SVN.
+- linear regression and decision trees: I preferred a non-parametric model over a parametric model because I did not want to define the parameters beforehand.
 
 ### Training and Applying the k-NN classifier
 

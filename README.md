@@ -19,28 +19,25 @@ In the case of the red supergiant and OB star binaries, the axes were photometri
 To train the k-NN classifier, I heavily relied on the following [blog post](https://towardsdatascience.com/building-a-k-nearest-neighbors-k-nn-model-with-scikit-learn-51209555453a) and will go into a bit more detail below.
 
 ### Why use k-NN?
-When I was first figuring out which algorithm to use to differentiate between the binary and single red supergiants, I looked into a variety of classification algorithms. I decided to use k-NN for the following reasons:
-* It is simple to implement and explain. Given this was my first foray into scikit-learn, I wanted to pick an algorithm I was going to be able to understand and explain during presentations and in my published paper.
+When I was first figuring out which algorithm to use to differentiate between the binary and single red supergiants, I looked into a variety of classification algorithms and followed the handy guidelines from [scikit learn's "choosing the right estimator" cheat-sheat](https://scikit-learn.org/stable/tutorial/machine_learning_map/index.html). If we step through it, I started off with >50 samples, and was attempting to predict the category for a set of objects (binary vs. non-binary). This put me in the red "classification" blob. Since I had less than 100K samples, I decided to primarily investigate linear SVCs and k-NN. I opted for k-NN due to the following reasons:
+* It is simple to implement and explain. Given this was my first foray into scikit-learn, I wanted to pick an algorithm I was going to be able to understand and explain during presentations and in my published paper (with my audience being other astronomers, not ML experts).
 * It evolves with new data and is easy to train on new datasets. Because I wanted to apply this method to various sets of stars in different galaxies, I needed an algorithm that could be adjusted accordingly.
 * The algorithm also assumes that all features are of equal importance. While this could be a downside for some datasets, this was exactly what I needed for my classification purposes.
-* The time compexity behind k-NN isn't great ... it is O(MNlog(k)) where M is the number of dimensions, N is the number of training datasets, and k is the number of points to classify. However, because my datasets were small, the time complexity was sufficient for my needs.
+* The time compexity behind k-NN isn't great ... it is O(MNlog(k)) where M is the number of dimensions, N is the number of training datasets, and k is the number of points to classify. However, because my datasets were small (hundreds of stars), the time complexity was sufficient for my needs.
 * One downside of k-NN is that it is sensitive to outliers. However, because I scaled the relative importance of distance (so that points that were closer had a higher weight), I was able to guard against outliers dominating the classification results.
 
-The other options I considered (and why I didn't use them) include:
-- Neural Networks: Given my small-ish set of training data, I was not confident that I could get a good accuracy level with neural networks. Additionally, neural networks have a large number of hyperparameters that need tuning and I was more comfortable only needing to tune `k` and the distance function for k-NN.
-- SVN (support vector network): Since I had sufficiently more training data than the number of features I was using, the accuracy for k-NN is higher than for SVN.
-- linear regression and decision trees: I preferred a non-parametric model over a parametric model because I did not want to define the parameters beforehand.
+While I likely could have also been successful using a linear SVC, the k-NN approach worked well for my dataset!
 
 ### Training and Applying the k-NN classifier
 
 The k-NN model was trained on the 295 red supergiants (single and binary) that had been observed spectroscopically and were thus known to be either single or binary. The features used were the following:
-* Magnitudes: Umag, Bmag, Vmag, Imag
-* Colors: U-B, B-V
-* Flag: UV (0 if no detection in UV, 1 if detection in UV from [Swift archival data](https://heasarc.gsfc.nasa.gov/docs/archive.html))
+* Magnitudes: Umag, Bmag, Vmag, Imag (structured data)
+* Colors: U-B, B-V (structure data)
+* Flag: UV (0 if no detection in UV, 1 if detection in UV from [Swift archival data](https://heasarc.gsfc.nasa.gov/docs/archive.html)). The initial data was unstructured since it began as images. I then manually turned it into structured data by visually determining the brightness of each star in the UV and assigning a relative Flag value to each star as part of my preprocessing routine. 
 
 The first step was to scale the feature values using `sklearn RobustScaler`. This is because the magnitude values ranged from 15 - 20, the colors ranged from -5 to 5, and the UV flag was either 0 or 1. Instead of having the magnitudes get more weight because their values were larger, I wanted each of the features to get the same weight when classifying. Scaling the features achieves this.
 
-The next step was to define the classifier using the spectroscopically confirmed / known single and binary red supergiants. Using the method described in the [blog post](https://towardsdatascience.com/building-a-k-nearest-neighbors-k-nn-model-with-scikit-learn-51209555453a), I determined that the optimal number of folds for cross-validation was 15 (`cv = 15`). I then iterated over the `leaf_size`, `n_neighbors`, and `p` value to find the best set of hyperparameters for classification by maximizing the model's overall score.
+The next step was to define the classifier using the spectroscopically confirmed / known single and binary red supergiants. Using the method described in the [blog post](https://towardsdatascience.com/building-a-k-nearest-neighbors-k-nn-model-with-scikit-learn-51209555453a), I determined that the optimal number of folds for cross-validation was 15 (`cv = 15`). I then iterated over the `leaf_size`, `n_neighbors`, and `p` value to find the best set of hyperparameters for classification by maximizing the model's overall score. This process also took into account that a small set of data was then reserved for later testing and validation as opposed to training. 
 
 For reference, I found the following results were ideal for my set of data:
 * cv = 15; folds for cross-validation / how many times the test dataset (the knowns) is split up and tested. In this case, it will be split up into 15 groups and tested 15 different times. Since there are 295 supergiants, this results in around 20 stars for each test.
@@ -51,6 +48,9 @@ For reference, I found the following results were ideal for my set of data:
 * best score = 0.9339; This is essentially the error and can be estimated using the set of known stars. 
 
 Finally, I applied this k-NN model to the 3698 unclassified red supergiants and produced the results below.
+
+### A few notes ...
+An important part of training a ML algorithm that I *did not* do as part of this process was to overfit and then regularize my k-NN classifier. However, since my dataset was small and it was easy to visualize the final result (see below), I was able to manually inspect the results and add a "sanity check" for consistency. For example, if my final k-NN classifier predicted that stars with little to no extra flux in the UV were consistently being classified as binaries, I would know that something had gone wrong with my method. Instead, the results were as expected and I am confident that my model did not overfit the test data such that the actual data could not be well represented by the results.
 
 ### Results
 
